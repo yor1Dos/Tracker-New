@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a1428">
+  <title>Situation overview · ResQ</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><div class="brand-mark">R</div><div><strong>ResQ</strong><small>DISASTER RESPONSE</small></div></div>
+      <div class="nav-label">MENU</div>
+      <nav class="nav" aria-label="Main navigation">
+        <a class="active" href="#overview" data-nav="overview"><i class="ico" aria-hidden="true">▦</i><span>Overview</span></a>
+        <a href="#map" data-nav="map"><i class="ico" aria-hidden="true">⌖</i><span>Live map</span></a>
+        <a href="#weather" data-nav="weather"><i class="ico" aria-hidden="true">☁</i><span>Weather</span></a>
+        <a href="#alerts" data-nav="alerts"><i class="ico" aria-hidden="true">⚠</i><span>Disaster alerts</span></a>
+        <a href="#emergency" data-nav="emergency"><i class="ico" aria-hidden="true">✚</i><span>Emergency</span></a>
+        <a href="#qr" data-nav="qr"><i class="ico" aria-hidden="true">▧</i><span>QR access</span></a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="status-line"><i></i><span id="connection-status">Checking connection…</span></div>
+        <button class="side-action" id="theme-toggle"><i class="ico" aria-hidden="true">◐</i><span>Switch appearance</span></button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="icon-btn mobile-menu" id="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">☰</button>
+        <div class="topbar-title"><div class="eyebrow" id="page-eyebrow">EMERGENCY MANAGEMENT PLATFORM</div><h1 id="page-title">Situation overview</h1></div>
+        <div class="top-actions"><span class="live-pill"><i></i> LIVE DATA</span><button class="icon-btn" id="refresh-btn" title="Refresh data" aria-label="Refresh data">↻</button></div>
+      </header>
+
+      <!-- ============ PAGE: OVERVIEW ============ -->
+      <div class="view active" id="view-overview">
+        <section class="hero">
+          <div><h2>Stay informed. Stay prepared.</h2><p id="updated-label">Connect to live services for local conditions.</p></div>
+          <div class="location-chip">⌖ <span id="location-label">Location not set</span></div>
+        </section>
+
+        <section class="stats-grid">
+          <article class="stat-card"><div class="stat-top"><span>Current temperature</span><b>☀</b></div><strong id="stat-temp">--°</strong><small id="stat-condition">Waiting for location</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Local risk level</span><b>◈</b></div><strong id="stat-risk">Unknown</strong><small id="stat-risk-note">Based on available feeds</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Earthquake events</span><b>⌁</b></div><strong id="stat-quakes">--</strong><small>USGS · past 24 hours</small></article>
+          <article class="stat-card"><div class="stat-top"><span>GPS tracking</span><b>⌖</b></div><strong id="stat-gps">Off</strong><small id="stat-gps-note">Permission required</small></article>
+        </section>
+
+        <section class="content-grid">
+          <div>
+            <h3 class="section-title">Quick access</h3>
+            <div class="quick-grid">
+              <button class="quick-card" data-nav="map"><span class="quick-ico q-blue">⌖</span><b>Live map</b><small>Locate yourself and find nearby facilities</small><em>→</em></button>
+              <button class="quick-card" data-nav="weather"><span class="quick-ico q-sky">☁</span><b>Weather</b><small>Current conditions and 7-day outlook</small><em>→</em></button>
+              <button class="quick-card" data-nav="alerts"><span class="quick-ico q-amber">⚠</span><b>Disaster alerts</b><small>Earthquake activity near you</small><em>→</em></button>
+              <button class="quick-card" data-nav="emergency"><span class="quick-ico q-red">✚</span><b>Emergency SOS</b><small>Prepare a message with your coordinates</small><em>→</em></button>
+            </div>
+          </div>
+          <article class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">LATEST</span><h3>Nearest earthquakes</h3></div><button class="text-btn" data-nav="alerts">View all →</button></div>
+            <div id="overview-alerts" class="alert-list compact"><div class="empty-state">Loading earthquake feed…</div></div>
+          </article>
+        </section>
+      </div>
+
+      <!-- ============ PAGE: LIVE MAP ============ -->
+      <div class="view" id="view-map">
+        <article class="panel map-panel" id="map-section">
+          <div class="panel-heading"><div><span class="eyebrow">GEOSPATIAL MONITOR</span><h3>Live incident map</h3></div><div class="map-actions"><button class="small-btn" id="locate-btn">⌖ Locate me</button><button class="small-btn" id="fullscreen-btn">⛶ Full screen</button></div></div>
+          <div class="map-search"><input id="search-input" placeholder="Search a place or address…" aria-label="Search location"><button id="search-btn">Search</button></div>
+          <div id="map" role="application" aria-label="Interactive emergency map"></div>
+          <div class="map-legend"><span><i class="dot green"></i> Low</span><span><i class="dot yellow"></i> Moderate</span><span><i class="dot orange"></i> High</span><span><i class="dot red"></i> Severe</span><span><i class="dot blue"></i> Your location</span></div>
+          <div class="map-footer"><span id="map-status">Map ready · grant location permission to center on you</span><div><button class="text-btn" id="facilities-btn">Find nearby facilities</button><button class="text-btn" id="clear-facilities">Clear pins</button></div></div>
+        </article>
+      </div>
+
+      <!-- ============ PAGE: WEATHER ============ -->
+      <div class="view" id="view-weather">
+        <section class="content-grid weather-layout">
+          <article class="panel" id="weather-section">
+            <div class="panel-heading"><div><span class="eyebrow">OPEN-METEO</span><h3>Weather conditions</h3></div><span class="weather-symbol" id="weather-symbol">☁</span></div>
+            <div class="weather-main"><strong id="weather-temp">--°C</strong><span id="weather-description">Waiting for location</span></div>
+            <div class="weather-details">
+              <div><small>Feels like</small><b id="feels-like">--°C</b></div><div><small>Rain chance</small><b id="rain-chance">--%</b></div>
+              <div><small>Wind</small><b id="wind-speed">-- km/h</b></div><div><small>Humidity</small><b id="humidity">--%</b></div>
+              <div><small>Pressure</small><b id="pressure">-- hPa</b></div><div><small>UV index</small><b id="uv-index">--</b></div>
+            </div>
+            <p class="source-note">Source: Open-Meteo. Forecast is informational, not an official warning.</p>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">FORECAST</span><h3>Next hours &amp; 7-day outlook</h3></div></div>
+            <h4 class="subheading">Next hours</h4><div class="hourly-list" id="hourly-list"><span class="muted">Weather data will appear after location is set.</span></div>
+            <h4 class="subheading">7-day outlook</h4><div class="daily-list" id="daily-list"></div>
+          </article>
+        </section>
+      </div>
+
+      <!-- ============ PAGE: DISASTER ALERTS ============ -->
+      <div class="view" id="view-alerts">
+        <article class="panel" id="alerts-section">
+          <div class="panel-heading"><div><span class="eyebrow">VERIFIED FEED</span><h3>Earthquake activity</h3></div><span class="source-tag">USGS</span></div>
+          <div id="alert-list" class="alert-list"><div class="empty-state">Loading earthquake feed…</div></div>
+          <p class="source-note">USGS past-24-hour feed. This is not a complete Philippine disaster-warning service. Check PAGASA, PHIVOLCS and NDRRMC for official advisories.</p>
+        </article>
+      </div>
+
+      <!-- ============ PAGE: EMERGENCY ============ -->
+      <div class="view" id="view-emergency">
+        <section class="content-grid lower-grid">
+          <article class="panel" id="emergency-section">
+            <div class="panel-heading"><div><span class="eyebrow">QUICK RESPONSE</span><h3>Emergency assistance</h3></div><span class="sos-tag">SOS</span></div>
+            <p class="muted">Prepare a message containing your current coordinates. Review and confirm before sharing.</p>
+            <div class="contact-fields"><label>Emergency contact name<input id="contact-name" placeholder="e.g. Family contact"></label><label>Contact number<input id="contact-number" type="tel" placeholder="+63…"></label><button class="small-btn" id="save-contact">Save contact on this device</button></div>
+            <button class="sos-button" id="sos-btn">⚠ PREPARE EMERGENCY SOS</button>
+            <div class="emergency-actions"><button class="small-btn" id="share-location">Share my location</button><button class="small-btn" id="copy-coords">Copy coordinates</button></div>
+            <p class="source-note">This page cannot call emergency services or guarantee message delivery. Use your local emergency number where available.</p>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">CALL DIRECTLY</span><h3>Emergency hotlines</h3></div></div>
+            <ul class="hotline-list">
+              <li><span><b>911</b><small>National emergency hotline</small></span><a class="small-btn" href="tel:911">Call</a></li>
+              <li><span><b>143</b><small>Philippine Red Cross</small></span><a class="small-btn" href="tel:143">Call</a></li>
+            </ul>
+            <p class="source-note">Numbers can change. Confirm local hotlines with your barangay or municipal disaster office.</p>
+          </article>
+        </section>
+      </div>
+
+      <!-- ============ PAGE: QR ACCESS ============ -->
+      <div class="view" id="view-qr">
+        <section class="content-grid lower-grid">
+          <article class="panel" id="qr-section">
+            <div class="panel-heading"><div><span class="eyebrow">QUICK ACCESS</span><h3>Emergency QR code</h3></div><span class="source-tag">PUBLIC LINK</span></div>
+            <p class="muted">Create a QR code for this website. Scanning it opens the same page on another device. No GPS coordinates or private details are encoded.</p>
+            <div class="qr-wrap"><div id="qrcode"><span class="muted">QR code appears after deployment to HTTPS.</span></div><div><b>Website access QR</b><p class="source-note" id="qr-url">Deploy this project to a public HTTPS URL to enable sharing.</p><button class="small-btn" id="download-qr">Download QR image</button></div></div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><span class="eyebrow">DATA TRANSPARENCY</span><h3>Sources &amp; limitations</h3></div></div>
+            <ul class="source-list">
+              <li><b>Weather:</b> Open-Meteo forecast API</li><li><b>Earthquakes:</b> USGS GeoJSON past-day feed</li><li><b>Map:</b> OpenFreeMap / OpenStreetMap</li><li><b>Facilities:</b> OpenStreetMap Overpass query</li><li><b>Geocoding:</b> Nominatim search service</li>
+            </ul>
+            <p class="source-note">Flood, typhoon, tsunami, landslide and official evacuation alerts are not automatically certified by this demo. Check PAGASA, PHIVOLCS, NDRRMC and local government advisories for authoritative instructions.</p>
+          </article>
+        </section>
+      </div>
+
+      <footer>ResQ situational awareness demo · Verify urgent instructions with official authorities.</footer>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <div class="modal-backdrop" id="confirm-modal" aria-hidden="true"><div class="modal"><h3>Confirm emergency message</h3><p id="sos-preview"></p><div class="modal-actions"><button class="small-btn" id="cancel-sos">Cancel</button><button class="sos-button compact" id="confirm-sos">Continue to share</button></div><small>Delivery depends on the app or service you choose.</small></div></div>
+
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
